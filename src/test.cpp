@@ -149,6 +149,12 @@ TEST(input, readQueriesExceptions) {
                  "Vértice de partida e vértice de chegada coincidem");
 }
 
+TEST(util, widestPath) {
+    const graph G = {{{2000, 1}}, {{1500, 2}}, {{700, 3}}, {{}}};
+
+    EXPECT_EQ(Util::widestPath(G, 0, 3), 700);
+}
+
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
