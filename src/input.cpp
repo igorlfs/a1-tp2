@@ -67,7 +67,7 @@ void Input::readRoads(istream &_istream) {
         assert(weight <= MAX_WEIGHT,
                "Peso " << weight << " maior que o máximo " << MAX_WEIGHT);
 
-        roads[start].emplace_back(weight, end);
+        roads.at(start).emplace_back(weight, end);
     }
 }
 

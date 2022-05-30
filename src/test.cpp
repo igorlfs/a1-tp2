@@ -1,4 +1,5 @@
 #include "input.hpp"
+#include "util.hpp"
 #include <gtest/gtest.h>
 #include <list>
 #include <vector>
@@ -77,7 +78,7 @@ TEST(input, readRoads) {
     graph expected(MAX_CITIES);
     const graph EDGES = {{{2000, 2}}, {{1500, 3}}, {{700, 4}}};
     for (uint i = 0; i < EDGES.size(); ++i) {
-        expected[i + 1] = EDGES[i];
+        expected.at(i + 1) = EDGES.at(i);
     }
 
     // Atualiza parâmetro para ler a quantidade adequada de consultas
