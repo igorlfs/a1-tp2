@@ -1,0 +1,14 @@
+# Input / output for quick testing
+*.txt
+
+# Build files
+*.json
+.cache
+binary
+tests
+obj
+
+# Documentation
+doc/*
+!doc/documentação.tex
+!doc/documentação.pdf
