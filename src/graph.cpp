@@ -1,4 +1,4 @@
-#include "util.hpp"
+#include "graph.hpp"
 #include <climits>
 #include <queue>
 
@@ -8,9 +8,9 @@ using std::max;
 using std::min;
 using std::priority_queue;
 
-int Util::widestPath(const graph &g, const int &source, const int &target) {
+int Graph::widestPath(const int &source, const int &target) {
     // Inicializa maior gargalo para menos infinito
-    vector<int> widest(g.size(), INT_MIN);
+    vector<int> widest(this->g.size(), INT_MIN);
 
     // Use um heap para saber qual é o vérice com o maior gargalo até então
     priority_queue<pair<int, int>, vector<pair<int, int>>, greater<>> heap;
@@ -21,13 +21,13 @@ int Util::widestPath(const graph &g, const int &source, const int &target) {
 
     while (!heap.empty()) {
         pair<int, int> temp = heap.top();
-        int currentSrc = temp.second;
+        int currentSource = temp.second;
 
         heap.pop();
 
-        for (auto vertex : g[currentSrc]) {
+        for (auto vertex : this->g[currentSource]) {
             int distance = max(widest[vertex.second],
-                               min(widest[currentSrc], vertex.first));
+                               min(widest[currentSource], vertex.first));
 
             if (distance > widest[vertex.second]) {
                 // Atualiza gargalo

@@ -1,4 +1,5 @@
 #include "input.hpp"
+#include "graph.hpp"
 #include "msgassert.hpp"
 #include <algorithm>
 #include <list>
@@ -13,7 +14,7 @@ extern short numOfCities;
 extern short numOfRoads;
 extern short numOfQueries;
 
-extern vector<list<pair<int, int>>> roads;
+extern Graph roads;
 
 extern list<pair<int, int>> queries;
 
@@ -67,7 +68,7 @@ void Input::readRoads(istream &_istream) {
         assert(weight <= MAX_WEIGHT,
                "Peso " << weight << " maior que o máximo " << MAX_WEIGHT);
 
-        roads.at(start).emplace_back(weight, end);
+        roads.addEdge(start, end, weight);
     }
 }
 

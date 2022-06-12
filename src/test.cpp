@@ -1,5 +1,5 @@
+#include "graph.hpp"
 #include "input.hpp"
-#include "util.hpp"
 #include <gtest/gtest.h>
 #include <list>
 #include <vector>
@@ -10,10 +10,7 @@ int numOfCities;
 int numOfRoads;
 int numOfQueries;
 
-using graph = vector<list<pair<int, int>>>;
-
-const int MAX_CITIES = 100;
-graph roads(MAX_CITIES);
+Graph roads;
 
 list<pair<int, int>> queries;
 
@@ -75,11 +72,12 @@ TEST(input, readParametersExceptions) {
 }
 
 TEST(input, readRoads) {
-    graph expected(MAX_CITIES);
-    const graph EDGES = {{{2000, 2}}, {{1500, 3}}, {{700, 4}}};
-    for (uint i = 0; i < EDGES.size(); ++i) {
-        expected.at(i + 1) = EDGES.at(i);
-    }
+    // Vazio no início porque não consideramos o índice 0
+    // Vazio no final porque o vértice 4 existe mas grau de saída é 0
+    const graph EDGES = {{}, {{2000, 2}}, {{1500, 3}}, {{700, 4}}, {}};
+    Graph expected;
+    expected.setGraph(EDGES);
+    roads.resize(EDGES.size());
 
     // Atualiza parâmetro para ler a quantidade adequada de consultas
     numOfRoads = 3;
@@ -87,7 +85,7 @@ TEST(input, readRoads) {
     stringstream input("1 2 2000\n2 3 1500\n3 4 700");
     Input::readRoads(input);
 
-    EXPECT_EQ(expected, roads);
+    EXPECT_EQ(expected.getGraph(), roads.getGraph());
 }
 
 TEST(input, readRoadsExceptions) {
@@ -151,9 +149,13 @@ TEST(input, readQueriesExceptions) {
 }
 
 TEST(util, widestPath) {
-    const graph G = {{{2000, 1}}, {{1500, 2}}, {{700, 3}}, {{}}};
+    // Vazio no início porque não consideramos o índice 0
+    // Vazio no final porque o vértice 4 existe mas grau de saída é 0
+    const graph EDGES = {{}, {{2000, 2}}, {{1500, 3}}, {{700, 4}}, {}};
+    Graph g(EDGES.size());
+    g.setGraph(EDGES);
 
-    EXPECT_EQ(Util::widestPath(G, 0, 3), 700);
+    EXPECT_EQ(g.widestPath(1, 4), 700);
 }
 
 int main(int argc, char **argv) {
