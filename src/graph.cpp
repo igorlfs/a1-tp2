@@ -21,19 +21,20 @@ int Graph::widestPath(const int &source, const int &target) {
     widest[source] = INT_MAX;
 
     while (!heap.empty()) {
-        pair<int, int> temp = heap.top();
-        int currentSource = temp.second;
+        int currentSource = heap.top().second;
 
         heap.pop();
 
         for (auto vertex : this->g[currentSource]) {
-            int distance = max(widest[vertex.second],
-                               min(widest[currentSource], vertex.first));
+            int bottleneck = max(widest[vertex.second],
+                                 min(widest[currentSource], vertex.first));
 
-            if (distance > widest[vertex.second]) {
-                // Atualiza gargalo
-                widest[vertex.second] = distance;
-                heap.push(make_pair(distance, vertex.second));
+            if (bottleneck > widest[vertex.second]) {
+                // Atualiza o gargalo
+                widest[vertex.second] = bottleneck;
+
+                // Coloque o vértice no heap
+                heap.push(make_pair(bottleneck, vertex.second));
             }
         }
     }
