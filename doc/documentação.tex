@@ -1,0 +1,112 @@
+\documentclass{article}
+
+\usepackage{enumitem}
+\usepackage{indentfirst}
+\usepackage{amsfonts}
+\usepackage{hyperref}           % Use links
+\usepackage{graphicx}           % Coloque figuras
+\usepackage{float}              % [...] no lugar adequado!
+\usepackage[T1]{fontenc}        % Encoding para português 
+\usepackage{lmodern}            % Conserta a fonte para PT
+\usepackage[portuguese]{babel}  % Português
+\usepackage{hyphenat}           % Use hifens corretamente
+\usepackage[table]{xcolor}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+
+\graphicspath{{./img/}}
+\hyphenation{mate-mática recu-perar}
+\setlist{  
+    listparindent=\parindent,
+    parsep=0pt,
+}
+
+\def\code#1{\texttt{#1}}
+
+\makeatletter
+\def\BState{\State\hskip-\ALG@thistlm}
+\makeatother
+
+
+\author{\textbf{Igor Lacerda Faria da Silva}}
+\title{{TP 02 - Trabalho Prático 2}
+
+Algoritmos I}
+\date{%
+    \href{mailto:igorlfs@ufmg.br}{\nolinkurl{igorlfs@ufmg.br}}
+}
+\begin{document}
+\maketitle
+
+\section{Introdução}
+
+O TP foi desenvolvido em C++, em ambiente Linux (versão do \textit{kernel:} 5.18.0), utilizando algumas estruturas de dados como \code{std::vector}, \code{std::list} e \code{std::priority\_queue}. Em termos de boas práticas (formatação, \textit{case} de variáveis e afins), foram as usadas as ferramentas \code{clang-format} e \code{clang-tidy} para garantir um código limpo e consistente. Foram escritos testes de unidade para todas as funções do código, usando a biblioteca \code{<gtest>}. Os testes podem ser compilados e executados com o comando \code{make test} (assumindo-se que a biblioteca e o make estejam instalados no sistema).
+
+\section{Modelagem Computational do Problema}
+
+Em suma, o programa lê uma malha rodoviária e um conjunto de buscas, e encontra o caminho com o maior gargalo (peso suportado) em cada consulta. A leitura da entrada é dividida em 3 etapas: leitura dos parâmetros (número de cidades, número de vias e número de consultas), leitura das vias que compõem a malha (origem, destino e peso suportado) e leitura de consultas (origem e destino). Em seguida, é calculado o caminho desejado para cada consulta.
+
+As consultas são armazenadas como uma lista de pares ordenados: (partida, chegada). Essa distinção se faz importante porque as vias não são, necessariamente, de mão dupla: pode ser o caso de uma via só ``funcionar'' em um sentido, ou ainda, ter pesos diferentes no mesmo trajeto, (considerando-se sentidos diferentes). Além disso, não é menos que natural usar um grafo direcionado e ponderado para representar a estrutura da malha.
+
+Para realizar o cálculo do maior gargalo foi usado um algoritmo que é uma pequena variação do algoritmo de Dijkstra, que ao invés de considerar a menor distância até um dado vértice, considera justamente o gargalo. Para ilustrar o funcionamento desse algoritmo guloso, será discutido um exemplo de execução. Considere o seguinte grafo:
+
+\begin{figure}[H]
+	\includegraphics[width=8cm]{graph}
+	\centering
+\end{figure}
+
+Cada vértice possui possui um número de identificação (em consonância com a forma como o problema é implementado) e cada aresta possui um peso associado. O vértice de partida do exemplo de execução a ser discutido está indicado por um losango e o vértice de destino é indicado por um círculo. Nessa instância, é simples resolver o problema mentalmente: o esperado é que a resposta seja 4.
+
+A princípio, todos os vértices tem o gargalo definido como \( -\infty \), menos o vértice de partida que possui gargalo \( \infty \). Inicialmente é calculado o real gargalo para os vizinhos da fonte. Em seguida, é decidido o ``melhor caminho'' para proceder com base no gargalo da etapa anterior (no código isso é feito com um \textit{heap}). No caso, como o vértice 2 possui menor gargalo (3, contra 8 do vértice 3), ele é escolhido. Olhamos então o gargalo de seus vizinhos. O gargalo de 4, por exemplo, ainda é 3, pois 7 é maior que 3 (e maior que \( -\infty \)). Similarmente, o vértice 5 tem gargalo 3.
+
+A essa altura, o vértice de menor gargalo que ``ainda não foi explorado'' é o 4, com gargalo 3, então ele será o próximo a ser explorado. O único vértice alcançável a partir deste vértice é o destino, que por enquanto fica com gargalo igual a 1. Mas o destino não tem filhos, então é o vértice 5, de gargalo 3 que é o próximo a ser analisado. Como ele leva ao destino mais de forma mais \textit{espaçosa}, o gargalo do destino é atualizado para 3.
+
+Nesse momento, o único vértice na ``pilha'' é o 3. O gargalo de 5 é atualizado, e o de 6 definido como 4, que é obviamente menor, então será o próximo: o destino é atualizado para o valor esperado. A execução termina, voltando no 5 e concluindo que de fato 3 é menor que 4.
+
+A \textit{ideia} de execução do algoritmo é essa, resta então implementar isso de uma forma eficiente, especialmente a etapa de encontrar o menor gargalo atual. Estas e outras questões serão discutidas na próxima sessão.
+
+\section{Estruturas de Dados e Algoritmos}
+
+A principal estrutura de dados utilizada foi o grafo, implementado na classe \code{Graph} como um vetor de listas de pares de inteiros. Além dessa classe, existe a \code{Input}, que lida com a leitura da entrada (criar uma classe para isso facilita nos testes de unidade). Na classe \code{Input}, é adicionalmente usada uma lista para armazenar as consultas. A outra estrutura de dados utilizada no TP foi a lista de prioridades da biblioteca padrão para escolher o vértice adequado na escolha do caminho.
+
+O principal algoritmo implementado foi a seleção do caminho \textit{mais largo}, como discutido anteriormente. No entanto, algumas mudanças foram feitas na implementação, comparado à seção anterior: o \textit{heap} escolhe o MAIOR gargalo\footnote{Eu percebi que por algum motivo a execução é muito mais rápida dessa maneira.}. Uma vez que se tem a ideia intuitiva do algoritmo, a implementação fica bem mais simples. Atenção especial deve ser dada, no entanto, ao uso do \textit{heap} e a comparação que determina o gargalo: o máximo entre o gargalo atual do vértice e o mínimo entre o gargalo do ``pai'' atual e o peso da aresta atual. Esse é o \textit{cerne} da ``gulosidade'' do algoritmo.
+
+A seguir, é descrita a implementação dos algoritmos em pseudo-código:
+\begin{algorithm}
+	\caption{Retorna o maior gargalo de qualquer caminho entre src e tgt}
+	\begin{algorithmic}[1]
+		\Function{widestPath}{src, tgt}
+		\State $\textit{Wi} \gets -\infty \forall \textrm{ vertex} \neq \textrm{src}$
+		\State $\textit{heap} \gets \textrm{(0, src)}$
+		\While {heap != empty}
+		\State $\textit{newSrc} \gets heap \textrm{ top}$
+		\For {vertex in graph}
+		\State $\textit{bottleneck} \gets \max (Wi[vertex], \min (Wi[newSrc], vertexWeight))$
+		\If {bottleneck > Wi[vertex]}
+		\State $\textit{Wi[vertex]} \gets bottleneck$
+		\State $\textit{heap} \gets (bottleneck, vertex)$
+		\EndIf
+		\EndFor
+		\EndWhile
+		\State \Return $Widest[tgt]$
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm}
+
+\section{Análise de Complexidade de Tempo}
+
+A leitura dos parâmetros tem complexidade constante. A leitura das vias é \( \Theta(n) \) no número de vias, e a leitura de consultas é o \( \Theta(m) \) no número de consultas. No cálculo do \textit{widest path}, cada vértice é visitado uma única vez, e para cada vértice seus vizinhos são visitados. Desse modo, todas as arestas são visitadas uma única vez. Para cada aresta, são feitos 2 ajustes no \textit{heap} em tempo que é proporcional, no máximo a \( \log K \), em que \( K \) é o número de cidades do mapa. Portanto a complexidade dessa função é \( n \log K \).
+
+Analisando o programa como um todo, tendo em vista que são feitas \( m \) consultas de custo \( n \log K \) e nenhuma etapa excede esse custo, o programa tem complexidade \( mn \log K \).
+
+\section{Compilação}
+
+\texttt{g++ src/graph.cpp -c -Wall -std=c++17 -Ilib -o obj/graph.o}
+
+\texttt{g++ src/input.cpp -c -Wall -std=c++17 -Ilib -o obj/input.o}
+
+\texttt{g++ src/main.cpp -c -Wall -std=c++17 -Ilib -o obj/main.o}
+
+\texttt{g++ obj/graph.o obj/input.o obj/main.o -o tp2}
+
+\end{document}
