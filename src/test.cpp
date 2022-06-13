@@ -148,14 +148,32 @@ TEST(input, readQueriesExceptions) {
                  "Vértice de partida e vértice de chegada coincidem");
 }
 
-TEST(util, widestPath) {
+TEST(graph, widestPath) {
     // Vazio no início porque não consideramos o índice 0
-    // Vazio no final porque o vértice 4 existe mas grau de saída é 0
+    // Vazio no final porque o vértice 4 existe, mas grau de saída é 0
     const graph EDGES = {{}, {{2000, 2}}, {{1500, 3}}, {{700, 4}}, {}};
     Graph g(EDGES.size());
     g.setGraph(EDGES);
 
-    EXPECT_EQ(g.widestPath(1, 4), 700);
+    const int EXPECTED = 700;
+    const int ACTUAL = g.widestPath(1, 4);
+
+    EXPECT_EQ(ACTUAL, EXPECTED);
+}
+
+TEST(graph, widestPath2) {
+    // Vazio no início porque não consideramos o índice 0
+    // Vazio no final porque o último vértice existe, mas grau de saída é 0
+    const graph EDGES = {
+        {},       {{3, 2}, {8, 3}}, {{7, 4}, {6, 5}}, {{5, 5}, {4, 6}},
+        {{1, 7}}, {{3, 7}},         {{4, 7}},         {{}}};
+    Graph g(EDGES.size());
+    g.setGraph(EDGES);
+
+    const int EXPECTED = 4;
+    const int ACTUAL = g.widestPath(1, 7);
+
+    EXPECT_EQ(ACTUAL, EXPECTED);
 }
 
 int main(int argc, char **argv) {
