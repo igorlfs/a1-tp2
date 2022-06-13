@@ -2,7 +2,7 @@
 #include <climits>
 #include <queue>
 
-using std::greater;
+using std::less;
 using std::make_pair;
 using std::max;
 using std::min;
@@ -13,8 +13,9 @@ int Graph::widestPath(const int &source, const int &target) {
     vector<int> widest(this->g.size(), INT_MIN);
 
     // Use um heap para saber qual é o vérice com o maior gargalo até então
-    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<>> heap;
+    priority_queue<pair<int, int>, vector<pair<int, int>>, less<>> heap;
 
+    // Insira a fonte no heap
     heap.push(make_pair(0, source));
 
     widest[source] = INT_MAX;
