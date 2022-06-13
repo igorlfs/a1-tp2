@@ -9,7 +9,7 @@ int numOfCities;
 int numOfRoads;
 int numOfQueries;
 
-const int MAX_CITIES = 100;
+const int MAX_CITIES = 101;
 Graph roads(MAX_CITIES);
 
 list<pair<int, int>> queries;
